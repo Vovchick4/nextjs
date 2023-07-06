@@ -4,7 +4,7 @@ import styles from "./style.module.css"
 
 export default function LoaderList() {
     return (
-        <svg className={styles.ip} viewBox="0 0 256 128" width="256px" height="128px" xmlns="http://www.w3.org/2000/svg">
+        <svg className={styles.ip} viewBox="0 0 256 128" width="150px" height="50px" style={{ height: 50, width: "100%" }} xmlns="http://www.w3.org/2000/svg">
             <defs>
                 <linearGradient id="grad1" x1="0" y1="0" x2="1" y2="0">
                     <stop offset="0%" stop-color="#5ebd3e" />

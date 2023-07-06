@@ -8,23 +8,38 @@ import { useInView } from "@react-spring/web"
 import { MdDesignServices } from "react-icons/md"
 import { AiOutlineMail, AiFillInstagram } from "react-icons/ai"
 
-import { ListSpring, Spring, Trail } from "@/components"
+import { ListSpring, LoaderList, Spring, Trail } from "@/components"
 
-import { getApps } from "@/api"
+import { getApps, onSendEmailForm } from "@/api"
+import { IAppsData, ISendDataOnEmail } from "@/api/interfaces"
 
 import preview from "@/images/preview.jpg"
 import iphoneServices from "@/images/iphone-services.png"
 import contactHeroPreview from "@/images/contact-hero.jpg"
-import { IAppsData } from "@/api/interfaces"
 
 export default function Home() {
   const [categoryValue, setCategoryValue] = useState("web_app")
   const { data: dataApps, error, isLoading } = useSWR<IAppsData[]>(`get-apps/${categoryValue}`, async () => await getApps(categoryValue))
+  const [isLoadingSending, setIsLoadingSending] = useState(false)
 
   const [previewRef, previewInView] = useInView()
 
   function chooseCategory(value: string) {
     setCategoryValue(value)
+  }
+
+  async function onMessegeForm(event: any) {
+    setIsLoadingSending(true)
+    event.preventDefault();
+
+    const form = document.getElementsByTagName("form")[0]
+
+    const data: ISendDataOnEmail = { name: '', email: '', tel: '', message: '' };
+    (["name", "email", "tel", "message"] as string[]).forEach((key: string) => {
+      data[key] = event.target[key].value
+    })
+
+    await onSendEmailForm(data, () => setIsLoadingSending(false), () => { alert("Data send"); form.reset(); }, (err) => alert(err))
   }
 
   return (
@@ -165,7 +180,7 @@ export default function Home() {
           <div className="flex flex-wrap gap-8 mt-12">
 
             <Spring rootClassName="grow overflow-hidden" className="overflow-hidden" option={{ from: { x: -1000 }, to: [{ x: 100 }, { x: 0 }] }}>
-              <div className="flex flex-col justify-between px-3 py-4 text-white" style={{ minHeight: 426, backgroundColor: "rgba(255, 255, 255, 0.07)" }}>
+              <div className="flex flex-col justify-between px-3 py-4 text-white" style={{ minHeight: 515, backgroundColor: "rgba(255, 255, 255, 0.07)" }}>
                 <div>
                   <p className="mb-4">Our <b>Info</b></p>
                   <p className="flex items-center gap-2 mb-4">
@@ -199,10 +214,12 @@ export default function Home() {
               <div className="px-3 py-4 text-white" style={{ backgroundColor: "rgba(255, 255, 255, 0.07)" }}>
                 <p>Send us a <b>Message</b></p>
 
-                <form action="" className="flex flex-col gap-4 mt-3">
+                <form className="flex flex-col gap-4 mt-3" onSubmit={onMessegeForm}>
                   <label htmlFor="name">
                     <p className="mb-2">Name</p>
                     <input
+                      required
+                      name="name"
                       className="w-full p-2"
                       style={{ backgroundColor: "rgb(142,151,161,0.13)" }}
                       id="name"
@@ -212,15 +229,29 @@ export default function Home() {
                   <label htmlFor="email">
                     <p className="mb-2">Email</p>
                     <input
+                      required
+                      name="email"
                       className="w-full p-2"
                       style={{ backgroundColor: "rgb(142,151,161,0.13)" }}
                       id="email"
                       type="email"
                     />
                   </label>
+                  <label htmlFor="tel">
+                    <p className="mb-2">Email</p>
+                    <input
+                      required
+                      name="tel"
+                      className="w-full p-2"
+                      style={{ backgroundColor: "rgb(142,151,161,0.13)" }}
+                      id="tel"
+                      type="text"
+                    />
+                  </label>
                   <label htmlFor="message">
                     <p className="mb-2">Message</p>
                     <textarea
+                      required
                       className="w-full px-2 py-5 resize-none"
                       name="message"
                       id="message"
@@ -228,7 +259,9 @@ export default function Home() {
                     ></textarea>
                   </label>
 
-                  <button type="submit" className="max-w-xs p-2" style={{ backgroundColor: "rgb(142,151,161,0.13)" }}>Submit</button>
+                  <button type="submit" className="max-w-xs p-2" style={{ backgroundColor: "rgb(142,151,161,0.13)" }}>
+                    {isLoadingSending ? <LoaderList /> : "Submit"}
+                  </button>
                 </form>
               </div>
             </Spring>
